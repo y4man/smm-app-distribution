@@ -33,7 +33,7 @@ class ClientCalendar(models.Model):
 class ClientCalendarDate(models.Model):
     calendar = models.ForeignKey(ClientCalendar, on_delete=models.CASCADE, related_name='dates')
     created_at = models.DateTimeField(default=timezone.now)
-    date = models.TextField()
+    date = models.DateField()
     post_count = models.IntegerField(default=0)
 
     # Changed back to CharField to store a single value

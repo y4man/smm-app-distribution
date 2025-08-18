@@ -5,12 +5,14 @@ from django.contrib.auth import authenticate
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 
 # Django REST framework
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
 # JWT (Simple JWT)
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -47,8 +49,27 @@ class LoginView(APIView):
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
         password = request.data.get('password')
+
+        # username and password validation (MA)
+        if not username or not password:
+            raise ValidationError("Both username and password are required..")
+        
         # Authenticate user
         user = authenticate(request, username=username, password=password)
+        print(user)
+        # added user object validation..
+        if not user:
+            return Response(
+            {'error': 'Invalid credentials'},
+                status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # User Status Checks(MA)
+        if not user.is_active:
+            return JsonResponse({
+                "Error" :"Account is inactive"
+            }, status = status.HTTP_403_FORBIDDEN)
+        
         if user is not None:
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
@@ -73,10 +94,16 @@ class LoginView(APIView):
         
 
 class SetPasswordView(APIView):
-    permission_classes = [AllowAny]  # Allow any user to access this view without authentication
+
+    # change to IsAuthenticated
+    permission_classes = [IsAuthenticated]  # Allow any user to access this view without authentication
 
     def post(self, request, uidb64, token, *args, **kwargs):
         password = request.data.get('password')
+        if len(password) < 8:
+            return Response({
+                "ERROR":"Password must be 8 "
+            })
 
         try:
             # Decode the user id from the uidb64
@@ -97,7 +124,8 @@ class SetPasswordView(APIView):
         return Response({"message": "Password has been set successfully"}, status=status.HTTP_200_OK)
 
 class ForgotPasswordView(APIView):
-    permission_classes = [AllowAny]
+    # change to IsAuthenticated
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         email = request.data.get('email')
@@ -150,7 +178,8 @@ class ResetPasswordConfirmView(APIView):
         new_password = request.data.get('new_password')
         confirm_password = request.data.get('confirm_password')
 
-        if new_password != confirm_password:
+        # added not new_password
+        if new_password != confirm_password or not new_password or not confirm_password:
             return Response({'error': 'Passwords do not match.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:

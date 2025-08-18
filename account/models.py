@@ -13,6 +13,11 @@ class CustomUserManager(BaseUserManager):
         """
         if not email:
             raise ValueError("The Email field must be set")
+        
+        # Added password validation by(MA)
+        if not password:
+            raise ValueError("The Password filed must be set")
+        
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -38,12 +43,13 @@ def profile_image_upload(instance, filename):
 
 
 
-
+# need No optimization (just race condition in username)
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, unique=True)
     role = models.CharField(
+        db_index= True,
     max_length=20,
     choices=[
         ('user', 'User'),  # Add this if you want 'user' as a role
@@ -61,9 +67,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=30, blank=True)
     agency_name = models.CharField(max_length=255, blank=True, null=True)
     # new field for agency slug
+    # we can use models.slugField
     agency_slug = models.CharField(max_length=255, blank=True, null=True)
     # new field for agency logo
-    acc_mngr_id = models.IntegerField(null=True, blank=True)  
+    # should be a foreign key (changed to foreign key)
+    acc_mngr_id = models.ForeignKey('self', on_delete=models.SET_NULL,null=True, blank=True)  
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -72,7 +80,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     profile = models.FileField(upload_to='profiles/', storage=SupabaseStorage(), null=True, blank=True)
     
     # Adding the relationship to Plans
-    # plans = models.ManyToManyField('pro_app.Plans', related_name="assigned_account_managers", blank=True)
+    plans = models.ManyToManyField('plan.Plans', related_name="assigned_account_managers", blank=True)
     USERNAME_FIELD = 'username'  # This allows logging in using the username
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
 
@@ -95,6 +103,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return f"{self.first_name} {self.last_name}".strip()
 
     def __str__(self):
-        return self.username
+        return f"{self.username} - {self.role}"
+        # return self.username
     
 

@@ -15,8 +15,13 @@ class Notification(models.Model):
     notification_type = models.CharField(max_length=255, choices=NOTIFICATION_TYPES, default='info')
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    client_id = models.IntegerField(null=True, blank=True)
-    client_name = models.CharField(max_length=255, null=True, blank=True)
+    # changed to foreign key
+    client_id = models.ForeignKey('client.Clients', on_delete=models.SET_NULL, null=True, blank=True)
+    # Removed the client name because we have added the client_id as foreign key
+    # client_name = models.CharField(max_length=255, null=True, blank=True)
+
+    # Task type should be remove (can be included in msg)
     task_type = models.CharField(max_length=255, null=True, blank=True)
+    
     def __str__(self):
         return f"Notification for {self.recipient} - {self.message[:50]}"

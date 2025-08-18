@@ -64,6 +64,8 @@ INSTALLED_APPS = [
     'django_extensions',
     'channels',
     'storages',
+    'debug_toolbar',
+    'silk',
 ]
 
 EXTERNAL_APPS = [
@@ -129,11 +131,13 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'silk.middleware.SilkyMiddleware',
 ]
 
 ROOT_URLCONF = 'smm_prod_project.urls'
@@ -205,7 +209,11 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+# Just for testing
 
+INTERNAL_IPS = [
+    "127.0.0.1",  # for localhost
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
