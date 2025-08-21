@@ -60,6 +60,13 @@ class UserSignupView(APIView):
         password = data.get('password')  #  Accept password from user
         agency_slug = data.get('agency_slug')
 
+        missing_fields = [field for field in ['email', 'first_name', 'last_name', 'password', 'agency_slug'] if not data.get(field)]
+        if missing_fields:
+            return Response(
+                {"message": f"Missing required fields: {', '.join(missing_fields)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         # 🔹 Check if user with this email already exists
         if CustomUser.objects.filter(email=email).exists():
             return Response({"message": " A user with this email already exists."}, status=status.HTTP_400_BAD_REQUEST)
@@ -135,8 +142,7 @@ class ClientPlanView(APIView):
 
         # Get the client's account manager
         account_manager = client.account_manager  # Ensure the account manager is fetched first
-        print(f"ACCOUNT MANAGER: {account_manager}")
-        print(f"ACCOUNT MANAGER ID: {account_manager.id}")
+
         if not account_manager:
             return Response({"error": "Client does not have an assigned account manager."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -221,10 +227,6 @@ class ClientPlanView(APIView):
                 current_platforms.update(updated_data["platforms"])
                 updated_data["platforms"] = current_platforms
 
-            # if "add_ons" in updated_data:
-            #     current_add_ons = plan.add_ons or {}
-            #     current_add_ons.update(updated_data["add_ons"])
-            #     updated_data["add_ons"] = current_add_ons
 
             # Save the updated plan data
             serializer.save(**updated_data)
@@ -443,6 +445,7 @@ class UpdateClientWorkflowView(APIView):
 class UploadProposalView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes     = (MultiPartParser, FormParser)
+    serializer_class = [serializers.ClientProposalSerializer]
 
     def get(self, request, client_id, *args, **kwargs):
         client     = get_object_or_404(models.Clients, id=client_id)

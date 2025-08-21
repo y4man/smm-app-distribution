@@ -17,20 +17,20 @@ urlpatterns = [
     path('webdev/<int:pk>', views.ClientWebDevDataDetailView.as_view(), name='client-detail'),
     
     # ✅
-    path('assign-team/<int:pk>', views.AssignClientToTeamView.as_view(), name='assign-client-to-team'),
+    path('<int:pk>/assign-team', views.AssignClientToTeamView.as_view(), name='assign-client-to-team'),
 
     # Tested
-    path('updateworkflow/<int:client_id>', views.UpdateClientWorkflowView.as_view(), name='update-client-workflow'),
+    path('<int:client_id>/update-workflow', views.UpdateClientWorkflowView.as_view(), name='update-client-workflow'),
 
     # need to test
-    path('proposal/<int:client_id>', views.UploadProposalView.as_view(), name='upload-proposal'),
+    path('<int:client_id>/proposal', views.UploadProposalView.as_view(), name='upload-proposal'),
     
 
     # HTTP 200 ok (need to test properly)
-    path('invoices/<int:client_id>', views.ClientInvoicesListCreateView.as_view(), name='client-invoices-list-create'),
+    path('<int:client_id>/invoices', views.ClientInvoicesListCreateView.as_view(), name='client-invoices-list-create'),
 
     # HTTPS 200 ok (need to test properly)
-    path('invoices/<int:client_id>/get/<int:pk>', views.ClientInvoicesRetrieveUpdateDeleteView.as_view(), name='client-invoices-rud'),
+    path('<int:client_id>/invoices/<int:pk>', views.ClientInvoicesRetrieveUpdateDeleteView.as_view(), name='client-invoices-rud'),
 
     # HTTP 404 (Not Found) (need to test properly)
     path('invoices/approve/', views.ApproveInvoiceView.as_view(), name='approve-invoice'),
@@ -39,13 +39,13 @@ urlpatterns = [
     path('invoices/reject/', views.RejectInvoiceView.as_view(), name='reject-invoice'),
 
     # ✅ Client Plans (you have to link the plan with account manager)
-    path('plan/<int:client_id>/', views.ClientPlanView.as_view(), name='client-plan-list-create'),
+    path('<int:client_id>/plans', views.ClientPlanView.as_view(), name='client-plan-list-create'),
 
-    path('reports/<int:client_id>/<str:month_name>', views.ClientMonthlyReportsListCreateView.as_view(), name='monthly_reports_list_create'),
+    path('monthly-reports/<int:client_id>/<str:month_name>', views.ClientMonthlyReportsListCreateView.as_view(), name='monthly_reports_list_create'),
 
-    path('reports/<int:pk>', views.ClientMonthlyReportsRUDView.as_view(), name='monthly_reports_rud'),
+    path('monthly-reports/<int:pk>', views.ClientMonthlyReportsRUDView.as_view(), name='monthly_reports_rud'),
 
-    path('team/<int:client_id>/', views.ClientTeamView.as_view(), name='client-team'),
+    path('<int:client_id>/client-team', views.ClientTeamView.as_view(), name='client-team'),
 
-    path('tasks/<int:client_id>/', views.ClientCustomTaskView.as_view(), name='client-custom-tasks'),
+    path('<int:client_id>/custom-tasks', views.ClientCustomTaskView.as_view(), name='client-custom-tasks'),
 ]

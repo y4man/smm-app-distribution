@@ -25,7 +25,6 @@ class UserSerializer(serializers.ModelSerializer):
         # Removed the duplicate "profile" entry
 
     def get_teams(self, user):
-        # due to circular dependency
         from team.serializers import TeamSerializer
         return TeamSerializer(
             [m.team for m in user.team_memberships.all()],
@@ -65,7 +64,6 @@ class UserSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
- 
  
   
 class UserRoleSerializer(serializers.ModelSerializer):

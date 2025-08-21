@@ -24,15 +24,16 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from storage3.exceptions import StorageApiError
 
 # App-specific
-from . import serializers
+from account.serializers import UserSerializer
 from account import models
 from pro_app import storage
 from pro_app.permissions import IsMarketingDirector
+from . import serializers
 
 # Create your views here.
 class ListUsersView(generics.ListAPIView):
     permission_classes = [IsAuthenticated, IsMarketingDirector]  # Change to `AllowAny` if needed
-    serializer_class = serializers.UserSerializer
+    serializer_class = UserSerializer
     
     def get_queryset(self):
         """
@@ -42,7 +43,7 @@ class ListUsersView(generics.ListAPIView):
       
 class UsersView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, IsMarketingDirector]  # Set appropriate permissions
-    serializer_class = serializers.UserSerializer
+    serializer_class = UserSerializer
     queryset = models.CustomUser.objects.all()
     lookup_field = 'id'
 
@@ -89,6 +90,8 @@ class AdminCreateUserView(APIView):
         subject = "Set your password"
         body = f"Hi {first_name}, please set your password using the following link: {set_password_url}"
         message = MIMEMultipart()
+
+        # Do not use hardcoded email.
         message['From'] = 'danish@mysocialmarketingexpert.com'
         message['To'] = email
         message['Subject'] = subject
@@ -109,23 +112,16 @@ class AdminCreateUserView(APIView):
 # PROFILE 
 class ProfileView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class   = serializers.UserSerializer
+    serializer_class   = UserSerializer
 
     def get_object(self):
         return self.request.user
 
-
-# class ProfileView(generics.RetrieveAPIView):
-#     permission_classes = [IsAuthenticated]
-#     serializer_class   = serializers.UserSerializer
-
-#     def get_object(self):
-#         return self.request.user
     
 
 class UpdateProfileView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = serializers.UserSerializer
+    serializer_class = UserSerializer
     parser_classes = (MultiPartParser, FormParser,JSONParser )
 
     def get_object(self):

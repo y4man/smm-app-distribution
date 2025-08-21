@@ -1,10 +1,15 @@
 from django.conf import settings
 from rest_framework import serializers
+
+from plan.models import Plans
 from .models import Clients, ClientsPlan
 from pro_app import models
 from .models import ClientInvoices
 from calender.models import ClientCalendar
 
+
+# def get_supabase_url(path: str) -> str:
+#     return f"{settings.SUPABASE_URL}/storage/v1/object/public/{settings.SUPABASE_BUCKET}/{path}"
 
 class ClientSerializer(serializers.ModelSerializer):
     # Get a single plan for the client, if it exists
@@ -31,7 +36,7 @@ class ClientSerializer(serializers.ModelSerializer):
 
         # Fetch the plan associated with the account manager and the plan type
         plan_type = client_plan.plan_type
-        plan = models.Plans.objects.filter(account_managers__id=account_manager.id).first()
+        plan = Plans.objects.filter(account_managers__id=account_manager.id).first()
 
         if not plan:
             return {"error": f"No {plan_type} plan found for the client's account manager."}

@@ -5,8 +5,8 @@ from . import views
 urlpatterns = [
    
     # ========================= MEETING MANAGEMENT ROUTES =========================
-    path('meetings', views.MeetingListCreateView.as_view(), name='meeting-list-create'),  # List or create meetings
-    path('meetings/<int:pk>', views.MeetingRetrieveUpdateDeleteView.as_view(), name='meeting-rud'),  # Update, delete meeting
+    path('', views.MeetingListCreateView.as_view(), name='meeting-list-create'),  # List or create meetings
+    path('<int:pk>', views.MeetingRetrieveUpdateDeleteView.as_view(), name='meeting-rud'),  # Update, delete meeting
 
     # Client Monthly Reports
 

@@ -1,10 +1,7 @@
 from rest_framework import serializers
 from client.models import Clients
-from user.serializers import UserSerializer
 from . import models
 from client.models import Clients
-
-
 
 
 class TeamSerializer(serializers.ModelSerializer):
@@ -27,6 +24,7 @@ class TeamSerializer(serializers.ModelSerializer):
 
 class TeamMembershipSerializer(serializers.ModelSerializer):
     # Due to circular import
+    from user.serializers import UserSerializer
     user = UserSerializer(read_only=True)
     user_id = serializers.IntegerField(write_only=True)
 

@@ -13,71 +13,40 @@ from .serializers import PlanSerializer,PlanAssignSerializer
 from pro_app.permissions import IsMarketingDirector
 from user.serializers import UserSerializer
 
-
-# Create your views here.
-class PlanView(generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
+class ListCreatePlanView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsMarketingDirector]
     queryset = Plans.objects.all()
     serializer_class = PlanSerializer
 
-    # List all plans or create a new plan
-    def get(self, request, *args, **kwargs):
-        if 'pk' in kwargs:
-            return self.retrieve(request, *args, **kwargs)  # Retrieve a specific plan by ID
-        return self.list(request, *args, **kwargs)  # List all plans
+# Create your views here.
+class RetrieveUpdateDestroyPlanView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsMarketingDirector]
+    queryset = Plans.objects.all()
+    serializer_class = PlanSerializer
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        print(request.data)
-        if serializer.is_valid():
-            # Create the new plan
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Update a plan
+    def _merge_nested_fields(self, plan, data, field_names):
+        for field in field_names:
+            if field in data:
+                current_value = getattr(plan, field) or {}
+                current_value.update(data[field])
+                data[field] = current_value
+
     def put(self, request, *args, **kwargs):
-        # Retrieve the plan to be updated
         plan = self.get_object()
-        data = request.data
+        data = request.data.copy()
+        self._merge_nested_fields(plan, data, [
+            'pricing_attributes',
+            'standard_attributes',
+            'advanced_attributes',
+            'pricing_platforms'
+        ])
+        serializer = self.get_serializer(plan, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
-        # Merge the pricing_attributes field
-        if 'pricing_attributes' in data:
-            current_pricing_attributes = plan.pricing_attributes or {}
-            current_pricing_attributes.update(data.get('pricing_attributes', {}))
-            data['pricing_attributes'] = current_pricing_attributes
-
-        # Merge the standard_attributes field
-        if 'standard_attributes' in data:
-            current_standard_attributes = plan.standard_attributes or {}
-            current_standard_attributes.update(data.get('standard_attributes', {}))
-            data['standard_attributes'] = current_standard_attributes
-
-        # Merge the advanced_attributes field
-        if 'advanced_attributes' in data:
-            current_advanced_attributes = plan.advanced_attributes or {}
-            current_advanced_attributes.update(data.get('advanced_attributes', {}))
-            data['advanced_attributes'] = current_advanced_attributes
-
-        # Merge the pricing_platforms field
-        if 'pricing_platforms' in data:
-            current_pricing_platforms = plan.pricing_platforms or {}
-            current_pricing_platforms.update(data.get('pricing_platforms', {}))
-            data['pricing_platforms'] = current_pricing_platforms
-
-        # Pass the merged data to the serializer for validation
-        serializer = self.get_serializer(plan, data=data, partial=True)  # Allow partial updates
-
-        if serializer.is_valid():
-            # Save the updated plan
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    # Handle the deletion of a plan
     def delete(self, request, *args, **kwargs):
-        plan = get_object_or_404(Plans, pk=kwargs['pk'])
+        plan = self.get_object()
         plan.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
       

@@ -25,46 +25,42 @@ urlpatterns = [
     path('admin/', admin.site.urls),  
     
     # Include API paths from pro_app
-    path('api/', include('pro_app.urls')), 
+    path('api/meetings', include('pro_app.urls')), 
 
     # Include API paths from user
-    path('user/', include('user.urls')),
+    path('api/users/', include('user.urls')),
 
     # Include API paths from account
-    path('auth/', include('account.urls')),  
+    path('api/', include('account.urls')),  
 
     # Include API path from client
-    path('client/', include('client.urls')),  
+    path('api/clients/', include('client.urls')),  
 
     # Include API path from Plan
-    path('plan/', include('plan.urls')), 
+    path('api/plans/', include('plan.urls')), 
 
     # Include API path from Calender
-    path('calender/', include('calender.urls')), 
+    path('api/calendars/', include('calender.urls')), 
 
     # Include API path from Team
-    path('team/', include('team.urls')),
+    path('api/teams/', include('team.urls')),
 
     # Include API path from post
-    path('post/', include('post.urls')) ,
+    path('api/post-attributes/', include('post.urls')) ,
 
     # Include API path from task
-    path('task/', include('task.urls')) ,
+    path('api/tasks/', include('task.urls')) ,
     
     # Include API path from strategy
-    path('strategy/', include('strategy.urls')),  
+    path('api/strategy/', include('strategy.urls')),  
     
     # Include API path from threadNotes
-    path('threadsnotes/', include('threadNotes.urls')), 
+    path('api/threadsnotes/', include('threadNotes.urls')), 
    
     # Include API path from notification
-    path('notification/', include('notifications.urls'))  
+    path('api/notification/', include('notifications.urls'))  
 ]
 
 # Serve media files during development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += [
-        path('__debug__/', include(debug_toolbar.urls)),
-        path('silk/', include('silk.urls', namespace='silk'))
-    ]

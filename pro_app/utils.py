@@ -1,3 +1,4 @@
+from client.models import ClientStatus, ClientWorkflowState
 from . import models
 # from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
@@ -5,6 +6,7 @@ from django.core.exceptions import ValidationError
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from account.models import CustomUser
+from task.models import Task
 
 # NEW 
 def create_task(client, task_type, user):
@@ -14,7 +16,7 @@ def create_task(client, task_type, user):
     """
     try:
         # Check if a task of the same type already exists for the client
-        existing_task = models.Task.objects.filter(client=client, task_type=task_type).first()
+        existing_task = Task.objects.filter(client=client, task_type=task_type).first()
         
         if existing_task:
             # If the existing task is completed, update it instead of creating a new one
@@ -35,14 +37,14 @@ def create_task(client, task_type, user):
 
         # If no existing task, create a new task
         print(f"Creating task: {task_type} for client: {client.business_name} assigned to: {user.username}")
-        task = models.Task.objects.create(client=client, assigned_to=user, task_type=task_type, is_completed=False)
+        task = Task.objects.create(client=client, assigned_to=user, task_type=task_type, is_completed=False)
         print(f"Task created successfully: {task}")
         return task
 
-    except models.Task.DoesNotExist:
+    except Task.DoesNotExist:
         # If no task exists, create a new one
         print(f"No existing task found. Creating new task: {task_type} for client: {client.business_name} assigned to: {user.username}")
-        task = models.Task.objects.create(client=client, assigned_to=user, task_type=task_type, is_completed=False)
+        task = Task.objects.create(client=client, assigned_to=user, task_type=task_type, is_completed=False)
         return task
 
     except ValidationError as e:
@@ -100,7 +102,7 @@ def mark_task_as_completed(task, current_user, reassign_to_marketing=False):
         return
     print(f"Next step: {next_step}, Next user: {next_user}")
     # Check if a similar task already exists for the client and next step
-    existing_task = models.Task.objects.filter(client=task.client, task_type=next_step).first()
+    existing_task = Task.objects.filter(client=task.client, task_type=next_step).first()
     if existing_task:
         if existing_task.is_completed:
             print(f"Reactivating existing task for next step '{next_step}' for client '{task.client.business_name}'")
@@ -132,7 +134,7 @@ def mark_task_as_completed(task, current_user, reassign_to_marketing=False):
         
 def update_client_workflow(client, next_step):
     """Update the client's workflow to the next step."""
-    workflow_state, _ = models.ClientWorkflowState.objects.get_or_create(client=client)
+    workflow_state, _ = ClientWorkflowState.objects.get_or_create(client=client)
     workflow_state.current_step = next_step
     workflow_state.save()
 
@@ -248,7 +250,7 @@ def check_proposal_status(task):
 
 def update_client_status(client, status):
     """Update the client's overall status."""
-    client_status, _ = models.ClientStatus.objects.get_or_create(client=client)
+    client_status, _ = ClientStatus.objects.get_or_create(client=client)
     client_status.status = status
     client_status.save()
 

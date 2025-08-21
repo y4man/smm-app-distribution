@@ -9,6 +9,6 @@ urlpatterns = [
 
     path('', views.TeamListCreateView.as_view(), name='create-list-teams'),
     # Retrieve, update, or delete a team
-    path('get/<int:pk>', views.TeamRetrieveUpdateDeleteView.as_view(), name='team-rud'),  
+    path('<int:pk>', views.TeamRetrieveUpdateDeleteView.as_view(), name='team-rud'),  
 
 ]

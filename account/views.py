@@ -6,13 +6,14 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
 
 # Django REST framework
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError 
 
 # JWT (Simple JWT)
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -35,6 +36,7 @@ from . import models
 
 # Create your views here.
 class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         try:
             refresh_token = request.data.get('refresh_token')
@@ -71,6 +73,9 @@ class LoginView(APIView):
             }, status = status.HTTP_403_FORBIDDEN)
         
         if user is not None:
+            user.last_login = timezone.now()
+            user.save()
+            
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
             refresh_token = str(refresh)
@@ -124,8 +129,8 @@ class SetPasswordView(APIView):
         return Response({"message": "Password has been set successfully"}, status=status.HTTP_200_OK)
 
 class ForgotPasswordView(APIView):
-    # change to IsAuthenticated
-    permission_classes = [IsAuthenticated]
+    # change to Allowany
+    permission_classes = [AllowAny]
 
     def post(self, request):
         email = request.data.get('email')

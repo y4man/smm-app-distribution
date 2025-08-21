@@ -14,7 +14,6 @@ class CustomUserManager(BaseUserManager):
         if not email:
             raise ValueError("The Email field must be set")
         
-        # Added password validation by(MA)
         if not password:
             raise ValueError("The Password filed must be set")
         
@@ -43,7 +42,6 @@ def profile_image_upload(instance, filename):
 
 
 
-# need No optimization (just race condition in username)
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True)
@@ -71,7 +69,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     agency_slug = models.CharField(max_length=255, blank=True, null=True)
     # new field for agency logo
     # should be a foreign key (changed to foreign key)
-    acc_mngr_id = models.ForeignKey('self', on_delete=models.SET_NULL,null=True, blank=True)  
+    acc_mngr_id = models.IntegerField(null=True, blank=True) 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
