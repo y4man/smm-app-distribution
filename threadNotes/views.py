@@ -9,18 +9,19 @@ from client.models import Clients
 from account.models import CustomUser
 from .models import Notes
 from .serializers import NotesSerializer
+from pro_app.permissions import IsMarketingDirector
 
 # Create your views here.
 class ThreadMessageListCreateView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsMarketingDirector]
     serializer_class = ClientMessageThreadSerializer
     
     def _check_permissions(self, client):
+
         """Helper method to check if the user can access the thread."""
         is_team_member = client.team.memberships.filter(user=self.request.user).exists()
         is_account_manager = client.account_manager == self.request.user
-        is_marketing_director = self.request.user.role == 'marketing_director'  # ✅ Direct role check
-
+        is_marketing_director = self.request.user.role.replace(' ', '_').lower() == 'marketing_director'  # ✅ Direct role check
         if not (is_team_member or is_account_manager or is_marketing_director):
             raise PermissionDenied("You do not have permission to access this thread.")
 

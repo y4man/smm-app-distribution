@@ -22,10 +22,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),  
-    
+    path('admin/', admin.site.urls),
+
     # Include API paths from pro_app
-    path('api/meetings', include('pro_app.urls')), 
+    path('api/pro_app/', include('pro_app.urls')), 
+
+    # Include API paths from meeting
+    path('api/meetings/', include('meeting.urls')), 
 
     # Include API paths from user
     path('api/users/', include('user.urls')),

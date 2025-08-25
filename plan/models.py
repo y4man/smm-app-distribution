@@ -6,7 +6,6 @@ import uuid
 # Create your models here.
 class Plans(models.Model):
     plan_name = models.CharField(max_length=255)
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     # Plan Pricing fields (merged from PlanPricing)
     pricing_attributes = models.JSONField(default=dict, blank=True, help_text="Key-value pairs for attributes like reel:100, post:200, etc.")
@@ -23,6 +22,7 @@ class Plans(models.Model):
     advanced_netprice = models.IntegerField(help_text="Net price for the advanced plan")
 
     # Additional fields
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     # Relationship with account managers (many-to-many)
     account_managers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="assigned_plans", blank=True)

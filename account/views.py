@@ -58,7 +58,6 @@ class LoginView(APIView):
         
         # Authenticate user
         user = authenticate(request, username=username, password=password)
-        print(user)
         # added user object validation..
         if not user:
             return Response(
@@ -142,7 +141,6 @@ class ForgotPasswordView(APIView):
         try:
             user = models.CustomUser.objects.get(email=email)
             username = user.username
-            print(f"Fetched Username: {username}")  # Debugging: Check if username is being fetched
         except models.CustomUser.DoesNotExist:
             return Response({'error': 'User with this email does not exist.'}, status=status.HTTP_404_NOT_FOUND)
 

@@ -2,8 +2,8 @@ from django.db import models
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
-from django.db import models
 from client.models import Clients
+
 
 # Create your models here.
 class ClientCalendar(models.Model):
@@ -14,7 +14,8 @@ class ClientCalendar(models.Model):
     ]
     client = models.ForeignKey(Clients, on_delete=models.CASCADE, related_name='calendars')
     created_at = models.DateTimeField(default=timezone.now)
-    month_name = models.TextField()
+    #  change the datatype of month_name to charfireld
+    month_name = models.CharField(max_length=20 , db_index=True)
     strategy_completed = models.BooleanField(default=False)
     content_completed = models.BooleanField(default=False)
     creatives_completed = models.BooleanField(default=False)
@@ -33,6 +34,7 @@ class ClientCalendar(models.Model):
 class ClientCalendarDate(models.Model):
     calendar = models.ForeignKey(ClientCalendar, on_delete=models.CASCADE, related_name='dates')
     created_at = models.DateTimeField(default=timezone.now)
+    # change the datatype to datefield
     date = models.DateField()
     post_count = models.IntegerField(default=0)
 

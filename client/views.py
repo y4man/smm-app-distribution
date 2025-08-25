@@ -36,6 +36,7 @@ from task.serializers import TaskSerializer, CustomTaskSerializer
 from calender.models import ClientCalendar
 from user.serializers import UserSerializer
 from client.models import Clients
+from pro_app.permissions import IsMarketingDirector
 
 
 # Client Signup
@@ -59,13 +60,6 @@ class UserSignupView(APIView):
         last_name = data.get('last_name')
         password = data.get('password')  #  Accept password from user
         agency_slug = data.get('agency_slug')
-
-        missing_fields = [field for field in ['email', 'first_name', 'last_name', 'password', 'agency_slug'] if not data.get(field)]
-        if missing_fields:
-            return Response(
-                {"message": f"Missing required fields: {', '.join(missing_fields)}"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
         # 🔹 Check if user with this email already exists
         if CustomUser.objects.filter(email=email).exists():
@@ -142,22 +136,18 @@ class ClientPlanView(APIView):
 
         # Get the client's account manager
         account_manager = client.account_manager  # Ensure the account manager is fetched first
-
         if not account_manager:
             return Response({"error": "Client does not have an assigned account manager."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Retrieve the client's plan
         client_plan = models.ClientsPlan.objects.filter(client=client).first()
-        print(f"CLIENT PLAN: {client_plan}")
         if not client_plan:
             return Response({"error": "No plan found for the specified client."}, status=status.HTTP_404_NOT_FOUND)
 
         # Fetch the plan associated with the account manager and the plan type
         plan_type = client_plan.plan_type
-        print(f"PLAN TYPE: {plan_type}")
         plan = Plans.objects.filter(account_managers__id=account_manager.id).first()  # Filter plans associated with the account manager
 
-        print(f"PLAN: {plan}")
         if not plan:
             return Response({"error": f"No {plan_type} plan found for the client's account manager."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -227,6 +217,10 @@ class ClientPlanView(APIView):
                 current_platforms.update(updated_data["platforms"])
                 updated_data["platforms"] = current_platforms
 
+            # if "add_ons" in updated_data:
+            #     current_add_ons = plan.add_ons or {}
+            #     current_add_ons.update(updated_data["add_ons"])
+            #     updated_data["add_ons"] = current_add_ons
 
             # Save the updated plan data
             serializer.save(**updated_data)
@@ -387,13 +381,13 @@ class ClientWebDevDataDetailView(generics.GenericAPIView):
         
 
 class AssignClientToTeamView(generics.UpdateAPIView):
-    permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
+    permission_classes = [IsAuthenticated, IsMarketingDirector]  # Ensure the user is authenticated
     queryset = models.Clients.objects.all()
     serializer_class = serializers.AssignClientToTeamSerializer
 
     def update(self, request, *args, **kwargs):
         # Check if the logged-in user has the "marketing_director" role
-        if request.user.role != 'marketing_director':
+        if request.user.role.replace(' ', '_').lower() != 'marketing_director':
             return Response(
                 {"error": "Only Marketing Director can assign a client to a team."},
                 status=status.HTTP_403_FORBIDDEN
@@ -428,9 +422,15 @@ class UpdateClientWorkflowView(APIView):
         task_type = request.data.get('task_type')
         assigned_to_id = request.data.get('assigned_to')
 
+
         if not task_type or not assigned_to_id:
             return Response({"error": "task_type and assigned_to are required."}, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            assigned_user = CustomUser.objects.get(id=assigned_to_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": f"User with ID {assigned_to_id} does not exist."},
+                    status=status.HTTP_400_BAD_REQUEST)
         # Update or create the task for the client
         task, created = Task.objects.update_or_create(
             client=client,
@@ -445,7 +445,6 @@ class UpdateClientWorkflowView(APIView):
 class UploadProposalView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes     = (MultiPartParser, FormParser)
-    serializer_class = [serializers.ClientProposalSerializer]
 
     def get(self, request, client_id, *args, **kwargs):
         client     = get_object_or_404(models.Clients, id=client_id)

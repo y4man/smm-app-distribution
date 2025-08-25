@@ -31,4 +31,3 @@ class TeamMembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.TeamMembership
         fields = ['id', 'team', 'user', 'user_id']
-

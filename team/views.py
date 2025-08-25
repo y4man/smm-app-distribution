@@ -45,7 +45,7 @@ class TeamListCreateView(generics.ListCreateAPIView):
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
-                membership = models.TeamMembership.objects.create(team=team, user=user)
+                membership = TeamMembership.objects.create(team=team, user=user)
                 roles_added.add(user.role)
                 members_added.append({
                     'user_id': user.id,
@@ -144,7 +144,7 @@ class TeamRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
                         )
                     
                     # Create or update the membership
-                    membership, created = models.TeamMembership.objects.update_or_create(
+                    membership, created = TeamMembership.objects.update_or_create(
                         team=team, user=user, defaults={}
                     )
                     roles_added.add(user.role)
@@ -184,10 +184,10 @@ class TeamRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         member_id = request.data.get('membership_id')
 
         try:
-            membership = models.TeamMembership.objects.get(id=member_id, team=team)
+            membership = TeamMembership.objects.get(id=member_id, team=team)
             membership.delete()
             return Response({"message": "Member removed successfully."}, status=status.HTTP_200_OK)
-        except models.TeamMembership.DoesNotExist:
+        except TeamMembership.DoesNotExist:
             return Response({"error": "Member not found in this team."}, status=status.HTTP_404_NOT_FOUND)
 
     def edit_member(self, request, *args, **kwargs):
@@ -203,7 +203,7 @@ class TeamRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
             )
 
         try:
-            membership = models.TeamMembership.objects.get(id=member_id, team=team)
+            membership = TeamMembership.objects.get(id=member_id, team=team)
             user = membership.user
             user.role = new_role
             user.save()
@@ -213,7 +213,5 @@ class TeamRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
                 "username": user.username,
                 "new_role": user.get_role_display()
             }, status=status.HTTP_200_OK)
-        except models.TeamMembership.DoesNotExist:
+        except TeamMembership.DoesNotExist:
             return Response({"error": "Member not found in this team."}, status=status.HTTP_404_NOT_FOUND)
-
-

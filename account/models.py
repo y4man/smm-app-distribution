@@ -78,7 +78,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     profile = models.FileField(upload_to='profiles/', storage=SupabaseStorage(), null=True, blank=True)
     
     # Adding the relationship to Plans
-    plans = models.ManyToManyField('plan.Plans', related_name="assigned_account_managers", blank=True)
+    # due to circular dependency
+    # plans = models.ManyToManyField('plan.Plans', related_name="assigned_account_managers", blank=True)
     USERNAME_FIELD = 'username'  # This allows logging in using the username
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
 

@@ -1,8 +1,12 @@
 from rest_framework.permissions import BasePermission
 class RoleBasedPermission(BasePermission):
     allowed_roles = []
+
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role in self.allowed_roles
+        user = request.user
+        allowed_roles = getattr(self, 'allowed_roles', [])
+        return user.is_authenticated and getattr(user, 'role', '').lower() in [role.lower() for role in allowed_roles]
+
 class IsMarketingDirector(RoleBasedPermission):
     allowed_roles = ['marketing_director', 'Marketing Director']
 class IsMarketingManager(RoleBasedPermission):

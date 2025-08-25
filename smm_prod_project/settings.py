@@ -64,8 +64,6 @@ INSTALLED_APPS = [
     'django_extensions',
     'channels',
     'storages',
-    'debug_toolbar',
-    'silk',
 ]
 
 EXTERNAL_APPS = [
@@ -79,7 +77,8 @@ EXTERNAL_APPS = [
     'task',
     'strategy',
     'threadNotes',
-    'notifications'
+    'notifications',
+    'meeting'
 ]
 
 DEBUG = True

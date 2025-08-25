@@ -7,7 +7,8 @@ urlpatterns = [
     # ✅ Lists and Create all post attributes
     path('', views.PostAttributeListCreateView.as_view(), name='post-attribute-create'),
 
-    # ✅ List all the post according to attribute type
+    # some Error
+    # List all the post according to attribute type
     path('<str:attribute_type>', views.PostAttributeByTypeView.as_view(), name='post-attribute-by-type'),
 
     # ✅ Update a single post attribute
